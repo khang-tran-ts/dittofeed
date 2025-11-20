@@ -42,6 +42,9 @@ RUN yarn workspace emailo build && \
 COPY ./packages/lite/ ./packages/lite
 RUN yarn workspace lite build
 
+# Clean up temporary files and yarn cache to reduce image size
+RUN rm -rf /tmp/* ~/.yarn/berry/cache
+
 # Production image
 FROM node:20 AS runner
 
@@ -98,8 +101,12 @@ ENV NODE_ENV=production \
 COPY ./packages/admin-cli/scripts/install-deps.sh ./
 COPY ./packages/admin-cli/scripts/admin.sh ./
 RUN chmod +x ./install-deps.sh && \
-    chmod +x ./admin.sh && \
-    ./install-deps.sh
+    chmod +x ./admin.sh
+
+# Clean up temporary files and cache to reduce image size
+RUN rm -rf /tmp/* /var/tmp/* ~/.cache
+
+RUN ./install-deps.sh
 
 EXPOSE 3000
 
